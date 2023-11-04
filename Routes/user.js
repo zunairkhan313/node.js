@@ -1,25 +1,73 @@
 const express = require("express")
 const router = express.Router()
+const UserModel = require('../Schema/User')
+const sendResponse = require("../helpers/sendResponse")
 
-router.post('/',(req , res)=>{
+
+router.post('/',async(req , res)=>{
     console.log('body console-->',req.body)
-    res.send('Post called on user Route')
+    
+    try{
+        const user = await UserModel.create({ ...req.body })
+
+        if(user){
+            sendResponse(res,200,user , "User created successfully",false)
+        } 
+    }
+    catch(err){
+
+        sendResponse(res , 500 , null , "internal server error",true)
+    }
 })
 
-router.get('/',(req , res)=>{
+router.get('/',async(req , res)=>{
     console.log('body query-->',req.query)
-    res.send('Get called on user Route')
+    try{
+        const user = await UserModel.find()
+
+        if(user){
+            sendResponse(res,200,user , "User fetched successfully",false)
+        } 
+    }
+    catch(err){
+
+        sendResponse(res , 500 , null , "internal server error",true)
+    }
 })
 
-router.put('/:id',(req , res)=>{
-    console.log('body params-->',req.params.id)
-    res.send('put called on user Route')
+router.put('/:id',async(req , res)=>{
+  
+    try{
+        const user = await UserModel.findByIdAndUpdate(req.params.id ,{ ...req.body }, {new : true})
+        console.log("user---->" , user);
+        if(user){
+            sendResponse(res,200,user , "User update successfully",false)
+        } else{
+            sendResponse(res , 403 , null,'user not found', true)
+        }
+    }
+    catch(err){
+
+        sendResponse(res , 500 , null , "internal server error",true)
+    }
 })
 
 
-router.delete('/:id',(req , res)=>{
-    console.log('body params-->',req.params.id)
-    res.send('Delete called on user Route')
+router.delete('/:id',async(req , res)=>{
+
+    try{
+        const user = await UserModel.findByIdAndDelete(req.params.id)
+        console.log("user-->",user);
+        if(user){
+            sendResponse(res,200,user , "User deleted successfully",false)
+        } else{
+            sendResponse(res , 403 , null,'user not found', true)
+        }
+    }
+    catch(err){
+
+        sendResponse(res , 500 , null , "internal server error",true)
+    }
 })
 
 module.exports = router
